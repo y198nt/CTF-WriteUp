@@ -98,6 +98,7 @@ rm.sendlineafter(b'Input s: ', b64encode(long_to_bytes(s)))
 
 success(rm.recvline().decode())
 ```
+![image](https://user-images.githubusercontent.com/90976397/168708086-d1e7d979-d744-41dd-a2bb-875e9a9eea99.png)
 
 
 # Category: Pwn
