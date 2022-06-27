@@ -83,6 +83,7 @@ Khi bạn đã đạt đến level để chơi pwnable.tw thì có lẽ bạn đ
 
 Để tận dụng được lỗi này chúng ta phải tìm được offset để có thể gây ra lỗi tràn bộ nhớ đệm (Ở một bài khác mình sẽ giải thích rõ cách này). Có khá là nhiều cách để có thể tìm, ở bài này mình dùng cách khá là automatically nhưng mình khuyến khích các bạn nên tìm theo cách lấy offset của eip trừ cho offset của buffer, cách này sẽ giúp các bạn hiểu rõ hơn về lỗi buffer overflow.
 * Đầu tiên mình sẽ tạo 1 chuỗi 50 ký tự 
+
 ![image](https://user-images.githubusercontent.com/90976397/175947712-991b2977-4a5d-4f55-bae5-ced62cc08d65.png)
 
 * Sau đó dùng chuỗi vừa tạo làm input cho chương trình 
