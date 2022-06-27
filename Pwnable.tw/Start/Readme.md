@@ -100,7 +100,7 @@ Và sau đó lỗi buffer overflow triggered và return address là 0x62626262 (
 
 
 
-Còn gì tuyệt vời hơn việc canary ở chương trình này đã tắt đó chính là NX disable :DD 
+Còn gì tuyệt vời hơn việc canary disable ở chương trình này đã tắt đó chính là NX disable :DD 
 > NX (non executable) là một cơ chế dùng để ngăn chặn attacker inject shellcode execute trực tiếp trên stack bằng việc hạn chế một số ô nhớ cụ thể và thực thi NX bit. Tuy nhiên cơ chế bảo vệ này vẫn có cách để bypass, cách phổ biến nhất đó là return to libc (cách attack này mình sẽ nói sau)
 
 ```Tổng kết lại chúng ta có lỗi buffer overflow để tấn công. Cách attack rất là đơn giản, chúng ta chỉ cần truyền shellcode lên stack và execute nó, sau đó chúng ta sẽ có được shell :DD (sound pretty easy LOL :) )```
