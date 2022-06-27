@@ -119,6 +119,7 @@ Chúng ta có thể thấy địa chỉ của stack pointer được đẩy lên
 ![image](https://user-images.githubusercontent.com/90976397/175950678-11b976eb-49cf-4699-896e-4a46758c7df9.png)
 
 > Bây giờ thứ chúng ta đã có là chúng ta có thể control được return address và stack pointer ở trên là thứ chúng ta cần phải leak, chúng ta có thể lợi dụng những gì chương trình có được để có thể leak. Quay lại đọc assembly code :D. Tại offset 0x08048087 chính là để bắt đầu in nội dung ở stack (ở đây chính là stack pointer) ra console. Và 4 byte đầu được in ra chính là stack pointer mà chúng ta cần ở đầu chương trình. Và đó chính là cách mà chúng ta sẽ thực hiện.
+
 ![image](https://user-images.githubusercontent.com/90976397/175961425-4e24ad6e-68a6-4de6-b10d-8e799b47e067.png)
 
 ![image](https://user-images.githubusercontent.com/90976397/175954741-cdfe281b-e89f-4c78-a4b2-632ce353c320.png)
