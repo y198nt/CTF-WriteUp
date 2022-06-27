@@ -94,7 +94,7 @@ Khi bạn đã đạt đến level để chơi pwnable.tw thì có lẽ bạn đ
 
 * Có vẻ như offset để có thể fill hết buffer là 20 và sau đó 4 byte tiếp theo là của return address, chúng ta có thể confirm thông qua việc nhập 20 chữ a cộng với 4 chữ b
 
-![image](https://user-images.githubusercontent.com/90976397/175949665-f4b8f8be-9629-4d93-873a-2adcbb577677.png)
+![image](https://user-images.githubusercontent.com/90976397/175960865-d534bcb1-15ec-4fff-b7a7-47bfb9d63d17.png)
 
 Và sau đó lỗi buffer overflow triggered và return address là 0x62626262 (4 chữ b). Thế là chúng ta đã có thể ghi đè return address.
 
