@@ -53,7 +53,7 @@ Mổ xẻ cái hàm này nào :DD
 ![image](https://user-images.githubusercontent.com/90976397/175891190-214acf7a-06ef-4c3f-b78c-c6828cdcd080.png)
 
 * stack pointer và offset của hàm exit được đẩy vào stack 
-* tất cả thanh ghi eax, ebx, ecx, edx đều được clear (dành cho những bạn nào chưa biết thì hàm xor khi xor với chính nó thì sẽ bằng 0)
+* tất cả thanh ghi eax, ebx, ecx, edx đều được clear (dành cho những bạn nào chưa biết thì hàm xor, khi xor với chính nó thì sẽ bằng 0)
 
 ![image](https://user-images.githubusercontent.com/90976397/175892310-c6a26f3f-e6b1-4bb4-9423-b33dacbae285.png)
 
