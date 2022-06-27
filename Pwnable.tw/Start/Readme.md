@@ -65,10 +65,25 @@ Mổ xẻ cái hàm này nào :DD
 * mov dl, 14h: dl đóng vai trò như là size của cái chuỗi mà chúng ta thực hiện. 0x14 đổi qua decimal là 20. 
 * mov bl, 1: bl được định nghĩa là file descriptor. Có nghĩa là chúng ta sẽ sử dụng stdout. 
 * mov al, 4: al được định nghĩa là syscall nào mà chúng ta muốn gọi, ở đây là 4 có nghĩa syscall chúng ta muốn gọi là sys_write. 
-> int 80h: theo định nghĩa ở trên stackoverflow thì: "INT is the assembly mnemonic for "interrupt". The code after it specifies the interrupt code. (80h/0x80 or 128 in decimal is the Unix System Call interrupt) When running in Real Mode (16-bit on a 32-bit chip), interrupts are handled by the BIOS". Mình đọc xong cũng chả hiểu cái vẹo gì  :)). Nói tóm lại int 80h nó giống như là một cái tín hiệu để ngắt quãng cái flow của chương trình để chuyển flow của chương trình sang interrupt handler ở đây là 0x80. Ở linux, 0x80 được định nghĩa là một system call 
+> int 80h: theo định nghĩa ở trên stackoverflow thì: "INT is the assembly mnemonic for "interrupt". The code after it specifies the interrupt code. (80h/0x80 or 128 in decimal is the Unix System Call interrupt) When running in Real Mode (16-bit on a 32-bit chip), interrupts are handled by the BIOS". Mình đọc xong cũng chả hiểu cái vẹo gì  :)). Nói tóm lại int 80h nó giống như là một cái tín hiệu để ngắt quãng cái flow của chương trình để chuyển flow của chương trình sang interrupt handler ở đây là 0x80. Ở linux, 0x80 được định nghĩa là một system call, hệ thống chuyển đổi control sang kernel và định nghĩa những gì mà mình muốn làm bằng việc đưa những giá trị cụ thể sang các thanh ghi, trong trường hợp này đó là những gì mà chúng ta định nghĩa ở trên.
+
 > Tổng kết lại ở trên có nghĩa là chúng ta sẽ lấy 20 characters từ stack và in ra màn hình console của user thông qua hàm sys_write.
 
+# Tìm lỗi của chương trình
 
+![828c021948f0bca9_49d6d372a69f13d5_5419315382339926185710](https://user-images.githubusercontent.com/90976397/175903627-b380acd4-b575-4ef8-96f0-4c48ac2c09a2.jpg)
+
+Sau khi chơi pwn được 1 khoảng thời gian thì mỗi lần chạy file binary mình sẽ check những lỗi cơ bản đầu tiên ví dụ như là: format string, buffer overflow, .....
+
+![image](https://user-images.githubusercontent.com/90976397/175905326-136bd64b-02c8-4962-a90c-35653e3c8352.png)
+
+Đúng như mình dự đoán lỗi đầu tiên đó là buffer overflow. Khi thử nhập nhiều chữ a hoặc bất kỳ ký tự nào bạn muốn. Chúng ta có thể confirm bằng việc sau khi nhập một chuỗi dài thì chương trình sẽ bị ngắt quãng và in ra Segmentation fault. 
+
+Khi bạn đã đạt đến level để chơi pwnable.tw thì có lẽ bạn đã biết phần nào về lỗi buffer overflow. Nhưng nếu bạn không biết thì cũng không sao, đã có mình ở đây rồi :D. 
+> Lỗi buffer overflow được định nghĩa là tràn bộ đệm, có nghĩa là khi chương trình đọc input của 1 biến nào đó vượt qua giới hạn của chính nó thì nó sẽ ghi đè xuống bất kể thứ gì ở dưới nó, điều này có thể dẫn tới việc bạn có thể ghi đè hoặc là leak ra thứ gì bạn muốn. Bạn có thể tưởng tượng đơn giản như này, bạn có một chai nước và một con dao, khi bạn lấy đầu con dao đâm một lực vừa đủ thì bạn có thể làm cho nó chảy nước ra ngoài. Btw, để có thể ngăn lỗi này thì cơ chế bảo vệ canary ra đời. 
+
+Còn gì tuyệt vời hơn việc canary ở chương trình này đã tắt đó chính là NX disable :DD 
+> NX là một cơ chế bảo vệ 
 
 
 
