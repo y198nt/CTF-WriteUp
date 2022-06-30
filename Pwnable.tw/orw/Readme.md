@@ -28,6 +28,7 @@ Dường như chỉ có mỗi canary là được bật, ở bài trước mình
 # Analyze 
 
 Mở IDA/Ghidra để xem thử bên trong nó có gì 
+
 Btw, một lần nữa, mình khuyến khích các bạn nên đọc assembly code thay vì đọc pseudocode nhé, giúp ích nhiều lắm đấy 
 
 ![image](https://user-images.githubusercontent.com/90976397/176628953-4e10f5d3-b12d-4767-9a92-5f5c1751eb0e.png)
