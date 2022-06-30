@@ -13,7 +13,7 @@
 
 ![image](https://user-images.githubusercontent.com/90976397/176624348-f5b82f50-f67c-4826-ac89-cabfa564642a.png)
 
-Tải file về rồi kiểm tra xem loại file và những cơ chế bảo mật được enable.
+Tải file về rồi kiểm tra xem loại file và những cơ chế bảo mật nào được enable.
 
 ![image](https://user-images.githubusercontent.com/90976397/176624755-231c9ac4-9669-4340-b294-183c3231f7f9.png)
 
