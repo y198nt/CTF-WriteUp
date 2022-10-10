@@ -1,0 +1,6 @@
+version: "3.9"
+services:
+  what_is_your_dream:
+    build: .
+    ports:
+      - "8000:13337"
