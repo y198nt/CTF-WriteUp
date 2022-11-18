@@ -2,11 +2,6 @@
 
 ---
 
-#### Đôi lời muốn nói
-
-Đây là lần thứ hai mình tham gia giải này với tư cách là thí sinh với team Sarmat, lần đầu mình tham gia là với team g4f năm ngoái, năm ngoái team mình cũng không gặt hái được gì nhiều nhưng năm nay đội mình đã chiến đấu hết mình và giành được giải 3 toàn Việt Nam và được 1 suất tham gia chung kết. 
-
-Năm nay giải có vẻ nhẹ hơn so với năm ngoái (do mình cảm thấy vậy hoặc là do năm ngoái mình phế vì không giải được câu nào :d ), năm nay mình giải được 3 câu pwn và 3 câu mics và ở dưới là solution cho 3 câu mình pwn giải được. 
 
 #### Pwn 
 
